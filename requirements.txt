@@ -3,3 +3,4 @@ flask_uploads
 flask_dropzone
 Pillow
 tensorflow
+gunicorn
