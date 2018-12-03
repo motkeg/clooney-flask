@@ -3,7 +3,7 @@ from flask_dropzone import Dropzone
 from flask_uploads import UploadSet, configure_uploads, IMAGES, patch_request_class
 
 
-from clooney_model.run import get_result
+from clooney_model.run import get_result , get_batch
 import os ,shutil
 
     
@@ -32,9 +32,7 @@ patch_request_class(app)  # set maximum file size, default is 16MB
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    # clean the "/upload folder"
-    #if os.path.isdir('uploads/'):
-    #    shutil.rmtree('uploads/')
+    
 
     # set session for image results
     if "file_urls" not in session:
@@ -44,21 +42,23 @@ def index():
 
     # handle image upload from Dropszone
     if request.method == 'POST':
-        file_obj = request.files
-        for f in file_obj:
-            file = request.files.get(f)
-            
-            # save the file with to our photos folder
-            filename = photos.save(
-                file,
-                name=file.filename    
-            )
+        
+            file_obj = request.files
+            for f in file_obj:
+                file = request.files.get(f)
+                
+                # save the file with to our photos folder
+                filename = photos.save(
+                    file,
+                    name=file.filename    
+                )
 
-            # append image urls
-            file_urls.append(photos.url(filename))
-            
-        session['file_urls'] = file_urls
-        return "uploading..."
+                # append image urls
+                file_urls.append(photos.url(filename))
+                
+            session['file_urls'] = file_urls
+            return "uploading..."
+       
     # return dropzone template on GET request    
     return render_template('upload.html')
 
@@ -76,19 +76,34 @@ def results():
     
     return render_template('results.html', file_urls=file_urls) """
 
-@app.route('/results')
+@app.route('/results',methods=['GET', 'POST'])
 def results():
-    
-    resultsrows = [['image name' , 'label']]
+    try:
+        """ resultsrows = [['image name' , 'label']]
+        for imgname in os.listdir(os.path.join("uploads")):
+            score  = get_result(f"uploads/{imgname}")
+            resultsrows.append([imgname , score])
+            """ 
+        resultsrows  = get_batch()       
+        return render_template('results.html', scores=resultsrows)  
+    except TypeError as e:
+        print (e)
+        return render_template('results.html', scores=get_batch())    
+    except ValueError as e:
+        print(e)
+        return render_template('results.html', scores=get_batch())
+        
+        
     
 
-    for imgname in os.listdir(os.path.join("uploads")):
-        score  = get_result(f"uploads/{imgname}")
-        resultsrows.append([imgname , score])
-    #print(resultsrows)    
-        
-    return render_template('results.html', scores=resultsrows)    
+@app.route('/clear')
+def clear():
+    # clean the "/uploads folder"
+    if os.path.isdir('uploads/'):
+       shutil.rmtree('uploads/')
+    return redirect(url_for('index'))   
+
 
 		
 if __name__ == '__main__':
-   app.run(debug = True)
+   app.run()
