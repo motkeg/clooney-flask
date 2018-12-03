@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>scores</title>
+
+        <style>
+            table, th, td {
+                border: 1px solid black;
+                border-collapse: collapse;
+            }
+            th, td {
+                padding: 5px;
+            }
+            </style>
+        
+    </head>
+    <body>
+        <h1>the scores are:</h1>
+        <table style="width:80%">
+            {% for row in scores %}
+            <tr>
+              <th>{{row[0]}}</th>
+              <th>{{row[1]}}</th> 
+              
+            </tr>
+            {% endfor %}
+          </table>
+
+       
+    </body>
+</html>
