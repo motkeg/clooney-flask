@@ -10,11 +10,9 @@ import os
 labels = ["brad" , "clooney" , "dicaprio" ,"matt"]
 
 
-
-
-
-
 def parse_score(score):
+    if max(score) <=0.1:
+        return "None"
     indx  = list(score).index(max(score))
     return labels[indx]
 
